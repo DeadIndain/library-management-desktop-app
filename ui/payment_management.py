@@ -14,6 +14,13 @@ from styles import (
     INFO, BG_CARD, BG_PANEL, BG_HOVER
 )
 
+STATUS_COLORS = {
+    "paid":      "#27AE60",
+    "due_soon":  "#F39C12",
+    "due_today": "#E67E22",
+    "overdue":   "#E74C3C",
+}
+
 
 class PaymentManagementWidget(QWidget):
     data_changed = pyqtSignal()
@@ -88,6 +95,12 @@ class PaymentManagementWidget(QWidget):
         self._pay_btn.clicked.connect(self._record_payment)
         right_header.addWidget(self._pay_btn)
 
+        self._wa_chat_btn = QPushButton("💬 Open Chat")
+        self._wa_chat_btn.setObjectName("btn_primary")
+        self._wa_chat_btn.setEnabled(False)
+        self._wa_chat_btn.clicked.connect(self._open_wa_chat)
+        right_header.addWidget(self._wa_chat_btn)
+
         self._wa_btn = QPushButton("📱 Send Reminder")
         self._wa_btn.setObjectName("btn_warning")
         self._wa_btn.setEnabled(False)
@@ -144,22 +157,22 @@ class PaymentManagementWidget(QWidget):
     def _load_students(self):
         search = self._search.text().strip() if hasattr(self, "_search") else ""
         students = db.get_all_students(search)
-        today = date.today().isoformat()
         self._student_table.setRowCount(len(students))
         for row, s in enumerate(students):
             self._student_table.setRowHeight(row, 38)
+            status = db.get_payment_status(s)
+            status_color = STATUS_COLORS.get(status, SUCCESS)
+            code = s.get("student_code") or ""
+            label = f"{s['name']}  [{code}]" if code else s["name"]
             for col, text in enumerate([
-                s["name"],
+                label,
                 s["phone"],
                 s.get("next_payment_date") or "–",
             ]):
                 item = QTableWidgetItem(text)
                 item.setData(Qt.UserRole, s["id"])
-                if col == 2 and s.get("next_payment_date"):
-                    if s["next_payment_date"] < today:
-                        item.setForeground(QColor(DANGER))
-                    elif s["next_payment_date"] == today:
-                        item.setForeground(QColor(WARNING))
+                # colour every cell in the row based on payment status
+                item.setForeground(QColor(status_color))
                 self._student_table.setItem(row, col, item)
 
     def _on_student_selected(self):
@@ -173,14 +186,17 @@ class PaymentManagementWidget(QWidget):
         s = self._selected_student
         self._history_title.setText(f"Payment History – {s['name']}")
         nd = s.get("next_payment_date") or "–"
-        today = date.today().isoformat()
-        nd_style = f"color: {DANGER};" if s.get("next_payment_date") and s["next_payment_date"] < today else ""
+        fee = db.get_effective_fee(s)
+        status = db.get_payment_status(s)
+        status_color = STATUS_COLORS.get(status, SUCCESS)
         self._info_label.setText(
             f"📞 {s['phone']}  |  🎓 {s['student_type']}  |  "
+            f"Fee: <b>₹{fee:,.0f}</b>  |  "
             f"Last Paid: {s.get('last_payment_date') or '–'}  |  "
-            f"<span style='{nd_style}'>Next Due: {nd}</span>"
+            f"<span style='color:{status_color};'>Next Due: {nd}</span>"
         )
         self._pay_btn.setEnabled(True)
+        self._wa_chat_btn.setEnabled(True)
         self._wa_btn.setEnabled(True)
         self._load_history()
 
@@ -212,6 +228,15 @@ class PaymentManagementWidget(QWidget):
             self._load_history()
             self._load_students()
             self.data_changed.emit()
+
+    def _open_wa_chat(self):
+        if not self._selected_student:
+            return
+        try:
+            from utils.whatsapp import open_whatsapp_chat
+            open_whatsapp_chat(self._selected_student["phone"])
+        except Exception as e:
+            QMessageBox.warning(self, "Error", f"Could not open chat:\n{e}")
 
     def _send_reminder(self):
         if not self._selected_student:

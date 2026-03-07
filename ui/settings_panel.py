@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QLineEdit, QTextEdit, QFrame, QFormLayout, QGroupBox,
     QScrollArea, QMessageBox, QSpinBox, QDoubleSpinBox,
-    QTimeEdit, QDialog, QFileDialog
+    QTimeEdit, QDialog, QFileDialog, QCheckBox
 )
 from PyQt5.QtCore import Qt, QTime, pyqtSignal
 import database as db
@@ -62,7 +62,19 @@ class SettingsWidget(QWidget):
         self._monthly_fee.setRange(0, 100000)
         self._monthly_fee.setPrefix("₹ ")
         self._monthly_fee.setDecimals(0)
-        form1.addRow("Monthly Fee Amount", self._monthly_fee)
+        form1.addRow("Monthly Fee (default)", self._monthly_fee)
+
+        self._fulltime_fee = QDoubleSpinBox()
+        self._fulltime_fee.setRange(0, 100000)
+        self._fulltime_fee.setPrefix("₹ ")
+        self._fulltime_fee.setDecimals(0)
+        form1.addRow("Full-time Monthly Fee", self._fulltime_fee)
+
+        self._halftime_fee = QDoubleSpinBox()
+        self._halftime_fee.setRange(0, 100000)
+        self._halftime_fee.setPrefix("₹ ")
+        self._halftime_fee.setDecimals(0)
+        form1.addRow("Half-time Monthly Fee", self._halftime_fee)
 
         self._total_seats = QSpinBox()
         self._total_seats.setRange(1, 500)
@@ -113,6 +125,30 @@ class SettingsWidget(QWidget):
         self._reminder_msg.setPlaceholderText("Use {name} for student name…")
         layout3.addWidget(self._reminder_msg)
         vbox.addWidget(group3)
+
+        group3b = QGroupBox("WhatsApp 3-Day Advance Reminder  (use {name}, {due_date})")
+        layout3b = QVBoxLayout(group3b)
+        self._enable_3day = QCheckBox("Enable 3-day advance reminder")
+        layout3b.addWidget(self._enable_3day)
+        self._reminder_3day_msg = QTextEdit()
+        self._reminder_3day_msg.setMinimumHeight(110)
+        self._reminder_3day_msg.setPlaceholderText(
+            "Hi {name}, your payment is due in 3 days on {due_date}. Please keep it ready."
+        )
+        layout3b.addWidget(self._reminder_3day_msg)
+        vbox.addWidget(group3b)
+
+        group3c = QGroupBox("WhatsApp 1-Day Advance Reminder  (use {name}, {due_date})")
+        layout3c = QVBoxLayout(group3c)
+        self._enable_1day = QCheckBox("Enable 1-day advance reminder")
+        layout3c.addWidget(self._enable_1day)
+        self._reminder_1day_msg = QTextEdit()
+        self._reminder_1day_msg.setMinimumHeight(110)
+        self._reminder_1day_msg.setPlaceholderText(
+            "Hi {name}, your payment is due tomorrow on {due_date}. Please arrange payment."
+        )
+        layout3c.addWidget(self._reminder_1day_msg)
+        vbox.addWidget(group3c)
 
         group4 = QGroupBox("WhatsApp Removal Message  (use {name} as placeholder)")
         layout4 = QVBoxLayout(group4)
@@ -184,6 +220,8 @@ class SettingsWidget(QWidget):
                 return QTime(0, 0)
 
         self._monthly_fee.setValue(float(s.get("monthly_fee", "500")))
+        self._fulltime_fee.setValue(float(s.get("fulltime_fee", "600")))
+        self._halftime_fee.setValue(float(s.get("halftime_fee", "400")))
         self._total_seats.setValue(int(s.get("total_seats", "69")))
         self._women_seats.setValue(int(s.get("women_reserved_seats", "10")))
         self._open_time.setTime(_t("opening_time", "06:00"))
@@ -194,6 +232,10 @@ class SettingsWidget(QWidget):
         self._evening_end.setTime(_t("evening_shift_end", "23:00"))
         self._reminder_msg.setPlainText(s.get("whatsapp_reminder_message", ""))
         self._removal_msg.setPlainText(s.get("whatsapp_removal_message", ""))
+        self._enable_3day.setChecked(s.get("enable_reminder_3day", "1") == "1")
+        self._enable_1day.setChecked(s.get("enable_reminder_1day", "1") == "1")
+        self._reminder_3day_msg.setPlainText(s.get("whatsapp_reminder_3day_message", ""))
+        self._reminder_1day_msg.setPlainText(s.get("whatsapp_reminder_1day_message", ""))
 
     def _save_settings(self):
         def _ts(t: QTime) -> str:
@@ -201,6 +243,8 @@ class SettingsWidget(QWidget):
 
         settings_map = {
             "monthly_fee": str(int(self._monthly_fee.value())),
+            "fulltime_fee": str(int(self._fulltime_fee.value())),
+            "halftime_fee": str(int(self._halftime_fee.value())),
             "total_seats": str(self._total_seats.value()),
             "women_reserved_seats": str(self._women_seats.value()),
             "opening_time": _ts(self._open_time.time()),
@@ -210,7 +254,11 @@ class SettingsWidget(QWidget):
             "evening_shift_start": _ts(self._evening_start.time()),
             "evening_shift_end": _ts(self._evening_end.time()),
             "whatsapp_reminder_message": self._reminder_msg.toPlainText(),
-            "whatsapp_removal_message": self._removal_msg.toPlainText(),
+            "whatsapp_removal_message":  self._removal_msg.toPlainText(),
+            "enable_reminder_3day":      "1" if self._enable_3day.isChecked() else "0",
+            "enable_reminder_1day":      "1" if self._enable_1day.isChecked() else "0",
+            "whatsapp_reminder_3day_message": self._reminder_3day_msg.toPlainText(),
+            "whatsapp_reminder_1day_message": self._reminder_1day_msg.toPlainText(),
         }
         for key, value in settings_map.items():
             db.set_setting(key, value)

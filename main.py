@@ -221,16 +221,33 @@ class MainWindow(QMainWindow):
         self._reminder_timer.start(3_600_000)  # every hour
 
     def _check_due_reminders(self):
-        """Auto-send WhatsApp reminders for students due today."""
-        students = db.get_due_today_students()
-        if not students:
-            return
+        """Auto-send WhatsApp reminders: due-today, 3-day advance, 1-day advance."""
         try:
-            from utils.whatsapp import send_message, format_reminder_message
+            from utils.whatsapp import (
+                send_message, format_reminder_message,
+                format_3day_message, format_1day_message
+            )
+
+            # ── Due today ────────────────────────────────────────────────────
             tmpl = db.get_setting("whatsapp_reminder_message") or ""
-            for s in students:
-                msg = format_reminder_message(tmpl, s["name"])
+            for s in db.get_due_today_students():
+                msg = format_reminder_message(tmpl, s["name"], s.get("next_payment_date") or "")
                 send_message(s["phone"], msg, async_send=True)
+
+            # ── 3-day advance ────────────────────────────────────────────────
+            if db.get_setting("enable_reminder_3day") == "1":
+                tmpl3 = db.get_setting("whatsapp_reminder_3day_message") or ""
+                for s in db.get_students_due_in_days(3):
+                    msg = format_3day_message(tmpl3, s["name"], s.get("next_payment_date") or "")
+                    send_message(s["phone"], msg, async_send=True)
+
+            # ── 1-day advance ────────────────────────────────────────────────
+            if db.get_setting("enable_reminder_1day") == "1":
+                tmpl1 = db.get_setting("whatsapp_reminder_1day_message") or ""
+                for s in db.get_students_due_in_days(1):
+                    msg = format_1day_message(tmpl1, s["name"], s.get("next_payment_date") or "")
+                    send_message(s["phone"], msg, async_send=True)
+
         except Exception as e:
             print(f"[Reminder] Error sending reminders: {e}")
 
@@ -244,6 +261,7 @@ def main():
 
     # Initialize database
     db.init_db()
+    db.store_monthly_snapshot()  # update monthly stats on every launch
 
     window = MainWindow()
     window.show()
