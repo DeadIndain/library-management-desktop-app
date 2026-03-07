@@ -1,9 +1,17 @@
 import sqlite3
 import os
+import sys
 from datetime import datetime, date, timedelta
 from typing import List, Optional, Dict, Any
 
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "library.db")
+# When running as a PyInstaller frozen binary, keep the database next to the
+# actual executable so data persists between launches (not in _MEIPASS temp dir).
+if getattr(sys, "frozen", False):
+    _BASE_DIR = os.path.dirname(sys.executable)
+else:
+    _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+DB_PATH = os.path.join(_BASE_DIR, "library.db")
 
 
 def get_connection():
