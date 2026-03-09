@@ -183,6 +183,26 @@ QComboBox QAbstractItemView::item:hover {{
     background-color: {BG_HOVER};
     color: {TEXT_PRIMARY};
 }}
+/* Explicit styling for Windows dropdown compatibility */
+QComboBox QListView {{
+    background-color: {BG_PANEL};
+    color: {TEXT_PRIMARY};
+    border: 1px solid {BG_HOVER};
+    outline: none;
+}}
+QComboBox QListView::item {{
+    color: {TEXT_PRIMARY};
+    background-color: {BG_PANEL};
+    padding: 6px 10px;
+}}
+QComboBox QListView::item:selected {{
+    background-color: {ACCENT};
+    color: white;
+}}
+QComboBox QListView::item:hover {{
+    background-color: {BG_HOVER};
+    color: {TEXT_PRIMARY};
+}}
 
 QDateEdit {{
     background-color: {BG_CARD};

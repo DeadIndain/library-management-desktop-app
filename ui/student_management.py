@@ -556,7 +556,11 @@ class PaymentDialog(QDialog):
         self._pay_date = QDateEdit()
         self._pay_date.setCalendarPopup(True)
         self._pay_date.setDisplayFormat("dd MMM yyyy")
-        self._pay_date.setDate(QDate.currentDate())
+        # Default to student's next due date if available, otherwise today
+        default_date = QDate.currentDate()
+        if self._student.get("next_payment_date"):
+            default_date = _qdate(self._student["next_payment_date"])
+        self._pay_date.setDate(default_date)
         self._pay_date.dateChanged.connect(self._update_next)
         form.addRow("Payment Date", self._pay_date)
 

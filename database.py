@@ -358,6 +358,25 @@ def add_student(data: Dict[str, Any]) -> int:
             "UPDATE seats SET student_id = ? WHERE seat_number = ?",
             (student_id, data["seat_number"])
         )
+    
+    # Record initial payment if last_payment_date is provided
+    if data.get("last_payment_date") and data.get("next_payment_date"):
+        # Calculate effective fee for this student
+        fee = data.get("custom_fee")
+        if fee is None:
+            if data["student_type"] == "Full-time":
+                fee = float(get_setting("fulltime_fee") or "600")
+            else:
+                fee = float(get_setting("halftime_fee") or "400")
+        else:
+            fee = float(fee)
+        
+        # Record the initial payment
+        c.execute("""
+            INSERT INTO payments (student_id, amount, payment_date, next_payment_date, note)
+            VALUES (?, ?, ?, ?, ?)
+        """, (student_id, fee, data["last_payment_date"], data["next_payment_date"], "Initial registration payment"))
+    
     conn.commit()
     conn.close()
     return student_id
