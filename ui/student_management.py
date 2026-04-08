@@ -104,6 +104,11 @@ class QuickAddStudentDialog(QDialog):
         self.setStyleSheet(
             f"QDialog {{ background-color: {BG_PANEL}; color: {TEXT_PRIMARY}; }}"
             f"QLabel   {{ color: {TEXT_PRIMARY}; background: transparent; }}"
+            f"QComboBox {{ background-color: {BG_CARD}; color: {TEXT_PRIMARY}; border: 1px solid #2A2A4A; border-radius: 6px; padding: 8px 10px; }}"
+            f"QComboBox:hover {{ border-color: {ACCENT}; }}"
+            f"QComboBox QAbstractItemView {{ background-color: {BG_PANEL}; color: {TEXT_PRIMARY}; border: 1px solid {BG_HOVER}; }}"
+            f"QComboBox QAbstractItemView::item {{ color: {TEXT_PRIMARY}; background-color: {BG_PANEL}; padding: 6px 10px; }}"
+            f"QComboBox QAbstractItemView::item:selected {{ background-color: {ACCENT}; color: white; }}"
         )
         root = QVBoxLayout(self)
         root.setContentsMargins(24, 20, 24, 20)
@@ -244,6 +249,11 @@ class StudentDialog(QDialog):
         self.setStyleSheet(
             f"QDialog {{ background-color: {BG_PANEL}; color: {TEXT_PRIMARY}; }}"
             f"QLabel   {{ color: {TEXT_PRIMARY}; background: transparent; }}"
+            f"QComboBox {{ background-color: {BG_CARD}; color: {TEXT_PRIMARY}; border: 1px solid #2A2A4A; border-radius: 6px; padding: 8px 10px; }}"
+            f"QComboBox:hover {{ border-color: {ACCENT}; }}"
+            f"QComboBox QAbstractItemView {{ background-color: {BG_PANEL}; color: {TEXT_PRIMARY}; border: 1px solid {BG_HOVER}; }}"
+            f"QComboBox QAbstractItemView::item {{ color: {TEXT_PRIMARY}; background-color: {BG_PANEL}; padding: 6px 10px; }}"
+            f"QComboBox QAbstractItemView::item:selected {{ background-color: {ACCENT}; color: white; }}"
         )
         outer = QVBoxLayout(self)
         outer.setContentsMargins(0, 0, 0, 0)
