@@ -18,3 +18,18 @@ Time: 19:32
 Phone Number: +911234567890
 Message: Hello gfdsqwer,Your study point fee is due tomorrow (2026-04-09).Please pay to avoid any interruption.नमस्ते gfdsqwer,कल आपकी लाइब्रेरी फीस (2026-04-09) देय है।
 --------------------
+Date: 9/4/2026
+Time: 0:28
+Phone Number: +911234567890
+Message: Hello sdfmhj,Your study point fee is due today.Please pay your monthly fee to continue using your seat.नमस्ते sdfmhj,आज आपकी लाइब्रेरी फीस देय है।कृपया अपनी सीट जारी रखने के लिए आज भुगतान करें।
+--------------------
+Date: 9/4/2026
+Time: 0:28
+Phone Number: +911234567890
+Message: Hello gegrsh,Your study point fee is due today.Please pay your monthly fee to continue using your seat.नमस्ते gegrsh,आज आपकी लाइब्रेरी फीस देय है।कृपया अपनी सीट जारी रखने के लिए आज भुगतान करें।
+--------------------
+Date: 9/4/2026
+Time: 0:28
+Phone Number: +911234567890
+Message: Hello gfdsqwer,Your study point fee is due today.Please pay your monthly fee to continue using your seat.नमस्ते gfdsqwer,आज आपकी लाइब्रेरी फीस देय है।कृपया अपनी सीट जारी रखने के लिए आज भुगतान करें।
+--------------------
